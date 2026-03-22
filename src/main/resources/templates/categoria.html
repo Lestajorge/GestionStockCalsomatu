@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f7f6; padding: 15px; }
+        .item-card { border: 2px solid #dee2e6; border-radius: 12px; padding: 12px; text-align: center; background: white; transition: 0.2s; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+        .item-card.selected { border-color: #0d6efd; background-color: #f0f7ff; }
+        .qty-input { width: 45px; text-align: center; border: 1px solid #ced4da; font-weight: bold; border-radius: 5px; }
+        .btn-qty { width: 34px; height: 34px; border-radius: 50%; border: none; color: white; font-weight: bold; }
+        .btn-minus { background-color: #dc3545; }
+        .btn-plus { background-color: #198754; }
+        .btn-confirm-fix { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 450px; z-index: 1000; }
+    </style>
+</head>
+<body>
+
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-white rounded shadow-sm">
+        <a th:href="@{/inventario(idEmpleado=${empleadoSeleccionado.idEmpleado})}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> VOLVER
+        </a>
+        <h4 class="fw-bold text-primary mb-0" th:text="${nombreSeccion}">CATEGORÍA</h4>
+    </div>
+
+    <div class="row g-2">
+        <div th:each="art : ${articulos}" class="col-6 col-md-3">
+            <div th:id="'card-' + ${art.idArticulo}" class="item-card shadow-sm">
+                <div>
+                    <div class="fw-bold small text-truncate nombre-art" th:text="${art.nombre}"></div>
+                    <div class="small text-muted" th:text="'Stock: ' + ${art.cantidad}"></div>
+                </div>
+                <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
+                    <button type="button" class="btn-qty btn-minus" th:onclick="'updateQty(' + ${art.idArticulo} + ', -1)'">-</button>
+                    <input type="number" th:id="'input-' + ${art.idArticulo}" class="qty-input" value="0" readonly>
+                    <button type="button" class="btn-qty btn-plus" th:onclick="'updateQty(' + ${art.idArticulo} + ', 1)'">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a th:href="@{/inventario(idEmpleado=${empleadoSeleccionado.idEmpleado})}" 
+       class="btn btn-primary btn-lg btn-confirm-fix fw-bold shadow">
+        AÑADIR Y VOLVER AL MENÚ <i class="bi bi-cart-plus ms-2"></i>
+    </a>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const carrito = JSON.parse(localStorage.getItem('carritoCalsomatu') || '{}');
+        Object.keys(carrito).forEach(id => {
+            const input = document.getElementById('input-' + id);
+            if (input) {
+                input.value = carrito[id].cantidad;
+                document.getElementById('card-' + id).classList.add('selected');
+            }
+        });
+    });
+
+    function updateQty(id, change) {
+        const input = document.getElementById('input-' + id);
+        const card = document.getElementById('card-' + id);
+        const nombre = card.querySelector('.nombre-art').innerText;
+        
+        let val = parseInt(input.value) + change;
+        if (val < 0) val = 0;
+        input.value = val;
+
+        let carrito = JSON.parse(localStorage.getItem('carritoCalsomatu') || '{}');
+        if (val > 0) {
+            card.classList.add('selected');
+            carrito[id] = { cantidad: val, nombre: nombre };
+        } else {
+            card.classList.remove('selected');
+            delete carrito[id];
+        }
+        localStorage.setItem('carritoCalsomatu', JSON.stringify(carrito));
+    }
+</script>
+</body>
+</html>

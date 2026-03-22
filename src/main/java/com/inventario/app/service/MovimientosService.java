@@ -7,6 +7,8 @@ package com.inventario.app.service;
 import com.inventario.app.model.Movimientos;
 import com.inventario.app.repository.MovimientosRepository;
 import java.util.List;
+
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -41,6 +43,12 @@ public class MovimientosService {
     public Movimientos guardarMovimiento(Movimientos m) {
             
         return movRepository.save(m); 
+    }
+
+    public List<Movimientos> listarTodos(){
+
+return movRepository.findAll(); 
+
     }
 
 }

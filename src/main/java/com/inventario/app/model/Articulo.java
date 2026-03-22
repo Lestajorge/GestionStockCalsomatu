@@ -15,9 +15,21 @@ public class Articulo implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idArticulo;
-
+    @OneToMany(mappedBy = "idArticulo")
+    @JsonIgnore
+    private List<Movimientos> movimientosList;
     private String nombre;
+    
+    public String getSeccion() {
+        return seccion;
+    }
+
+    public void setSeccion(String seccion) {
+        this.seccion = seccion;
+    }
+
     private Integer cantidad;
+    private String seccion; 
 
     public Integer getIdArticulo() {
         return idArticulo;
@@ -51,7 +63,5 @@ public class Articulo implements Serializable {
         this.movimientosList = movimientosList;
     }
 
-    @OneToMany(mappedBy = "idArticulo")
-    @JsonIgnore
-    private List<Movimientos> movimientosList;
+ 
 }
