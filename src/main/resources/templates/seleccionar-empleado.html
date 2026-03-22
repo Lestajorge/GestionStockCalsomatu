@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Movimientos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { margin-top: 50px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn-pdf { background-color: #d9534f; border: none; color: white; }
+        .btn-pdf:hover { background-color: #c9302c; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>Generar Reporte de Movimientos</h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted text-center">Seleccione un empleado para descargar el historial de sus movimientos en formato PDF.</p>
+                    
+                    <form th:action="@{/api/movimientos/exportar/pdf}" method="get">
+                        
+                        <div class="mb-4">
+                            <label for="empleadoId" class="form-label fw-bold">Empleado:</label>
+                            <select name="empleadoId" id="empleadoId" class="form-select form-select-lg" required>
+                                <option value="" disabled selected>-- Seleccione un trabajador --</option>
+                                <option th:each="emp : ${empleados}" 
+                                        th:value="${emp.idEmpleado}" 
+                                        th:text="${emp.nombre}"></option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-pdf btn-lg">
+                                <i class="bi bi-file-pdf"></i> Descargar Reporte PDF
+                            </button>
+                            <a th:href="@{/}" class="btn btn-outline-secondary">Volver al Inventario</a>
+                        </div>
+                        
+                    </form>
+                </div>
+                <div class="card-footer text-center text-muted">
+                    Sistemas de Inventario 2026
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</body>
+</html>

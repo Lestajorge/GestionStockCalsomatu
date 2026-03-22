@@ -1,0 +1,44 @@
+{
+  "info": {
+    "_postman_id": "245f0100-49f7-4e57-a0f8-85c17e08afae",
+    "name": "InventarioAPI",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53285528",
+    "_collection_link": "https://go.postman.co/collection/53285528-245f0100-49f7-4e57-a0f8-85c17e08afae?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Actualizar Articulo",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \n    \"nombre\": \"Maquina TIG 121\",\n    \"cantidad\": 1\n    \n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/articulos/crear",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "articulos",
+            "crear"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

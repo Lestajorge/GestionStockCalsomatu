@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Almacén - Selección por Tarjetas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f7f6; padding: 20px; }
+        .main-card { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        /* Tarjeta Individual */
+        .item-card {
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.2s ease;
+            background: white;
+            position: relative;
+        }
+        
+        /* Estado Activo (Cuando hay cantidad > 0) */
+        .item-card.selected {
+            border-color: #0d6efd;
+            background-color: #f0f7ff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(13, 110, 253, 0.1);
+        }
+
+        .item-icon { font-size: 2.5rem; color: #6c757d; margin-bottom: 8px; }
+        .item-card.selected .item-icon { color: #0d6efd; }
+
+        /* Controles de Cantidad internos */
+        .qty-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 12px;
+        }
+        .btn-qty {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            font-weight: bold;
+        }
+        .qty-input {
+            width: 45px;
+            text-align: center;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-weight: bold;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container main-card">
+    <div class="d-flex justify-content-between mb-4">
+        <button class="btn btn-primary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTrabajador">
+            <i class="bi bi-person-plus"></i> NUEVO TRABAJADOR
+        </button>
+        <button class="btn btn-success fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalArticulo">
+            <i class="bi bi-box-seam"></i> NUEVO ARTÍCULO
+        </button>
+    </div>
+<form th:action="@{/inventario/guardar}" method="post">
+        
+        <div class="mb-4 p-3 bg-light rounded border">
+            <label class="form-label fw-bold text-primary"><i class="bi bi-person-check-fill me-2"></i>TRABAJADOR:</label>
+            <select name="idEmpleado" class="form-select form-select-lg" required>
+                <option value="">-- ¿Quién retira el material? --</option>
+                <option th:each="emp : ${empleados}" th:value="${emp.idEmpleado}" th:text="${emp.nombre + ' ' + emp.apellidos}"></option>
+            </select>
+        </div>
+
+        <div class="row g-3 mb-5">
+            <div th:each="art : ${articulos}" class="col-6 col-md-3 col-lg-2">
+                <div class="item-card shadow-sm" th:id="'card-' + ${art.idArticulo}">
+                    
+                    <div class="item-icon"><i class="bi bi-wrench-adjustable"></i></div>
+                    <div class="fw-bold small text-truncate" th:text="${art.nombre}">Material</div>
+                    <div class="text-muted mb-2" style="font-size: 0.75rem;" th:text="'Stock: ' + ${art.cantidad}">0</div>
+                    
+                    <input type="hidden" name="articulosIds" th:value="${art.idArticulo}">
+                    
+                    <div class="qty-wrapper">
+                        <button type="button" class="btn btn-outline-danger btn-qty" th:onclick="'updateQty(' + ${art.idArticulo} + ', -1)'">-</button>
+                        <input type="number" name="cantidades" value="0" min="0" 
+                               th:id="'input-' + ${art.idArticulo}" 
+                               class="qty-input" onchange="checkStatus(this)">
+                        <button type="button" class="btn btn-outline-success btn-qty" th:onclick="'updateQty(' + ${art.idArticulo} + ', 1)'">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center p-3 border-top mt-4">
+           <a th:href="@{/inventario/reportes}" class="btn btn-link text-danger fw-bold text-decoration-none">
+    <i class="bi bi-file-earmark-pdf-fill"></i> REPORTE PDF
+</a>
+            <button type="submit" class="btn btn-warning btn-lg fw-bold px-5 shadow">
+                CONFIRMAR REGISTRO <i class="bi bi-check-all ms-2"></i>
+            </button>
+        </div>
+    </form>
+    <div class="mt-5 p-4 bg-white rounded shadow-sm border">
+    <h5 class="text-secondary fw-bold mb-4">
+        <i class="bi bi-clock-history me-2"></i>ÚLTIMOS MOVIMIENTOS
+    </h5>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Fecha / Hora</th>
+                    <th>Trabajador</th>
+                    <th>Material</th>
+                    <th class="text-center">Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="m : ${movimientos}">
+                    <td th:text="${#dates.format(m.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                    <td class="fw-bold" th:text="${m.idEmpleado.nombre + ' ' + m.idEmpleado.apellidos}">Nombre</td>
+                    <td th:text="${m.idArticulo.nombre}">Martillo</td>
+                    <td class="text-center">
+                        <span class="badge bg-info text-dark" th:text="${m.cantidad}">0</span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(movimientos)}">
+                    <td colspan="4" class="text-center text-muted p-4">No hay registros hoy</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+
+<div class="modal fade" id="modalTrabajador" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white"><h5 class="modal-title">Alta Trabajador</h5></div>
+            <form th:action="@{/empleados/guardar}" method="post">
+                <div class="modal-body p-4">
+                    <input type="text" name="nombre" class="form-control mb-3" placeholder="Nombre" required>
+                    <input type="text" name="apellidos" class="form-control mb-3" placeholder="Apellidos" required>
+                    <input type="text" name="numeroEmp" class="form-control" placeholder="DNI / ID" required>
+                </div>
+                <div class="modal-footer"><button type="submit" class="btn btn-primary w-100">Guardar</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalArticulo" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white"><h5 class="modal-title">Nuevo Artículo</h5></div>
+            <form th:action="@{/articulos/guardar}" method="post">
+                <div class="modal-body p-4">
+                    <input type="text" name="nombre" class="form-control mb-3" placeholder="Descripción" required>
+                    <input type="number" name="cantidad" class="form-control" placeholder="Stock Inicial" value="0">
+                </div>
+                <div class="modal-footer"><button type="submit" class="btn btn-success w-100">Registrar</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Función para los botones +/- de cada tarjeta
+    function updateQty(id, change) {
+        const input = document.getElementById('input-' + id);
+        let val = parseInt(input.value) + change;
+        if (val < 0) val = 0;
+        input.value = val;
+        checkStatus(input);
+    }
+
+    // Ilumina la tarjeta si tiene cantidad
+    function checkStatus(el) {
+        const cardId = el.id.replace('input-', 'card-');
+        const card = document.getElementById(cardId);
+        if (parseInt(el.value) > 0) {
+            card.classList.add('selected');
+        } else {
+            card.classList.remove('selected');
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
