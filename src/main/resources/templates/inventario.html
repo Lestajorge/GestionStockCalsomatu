@@ -60,6 +60,12 @@
     </style>
 </head>
 <body>
+<div th:if="${param.error == 'vacio'}" class="alert alert-danger">
+    <strong>Error:</strong> Debes seleccionar al menos un artículo para realizar un registro.
+</div>
+<div th:if="${param.exito == 'guardado'}" class="alert alert-success">
+    Registro guardado correctamente.
+</div>
 
 <div class="container main-card">
     <div class="d-flex justify-content-between mb-4">
@@ -70,7 +76,8 @@
             <i class="bi bi-box-seam"></i> NUEVO ARTÍCULO
         </button>
     </div>
-<form th:action="@{/inventario/guardar}" method="post">
+<form th:action="@{/inventario/guardar}" method="post" id="formInventario">
+    
         
         <div class="mb-4 p-3 bg-light rounded border">
             <label class="form-label fw-bold text-primary"><i class="bi bi-person-check-fill me-2"></i>TRABAJADOR:</label>
@@ -172,6 +179,25 @@
         </div>
     </div>
 </div>
+<script>
+        document.getElementById('formInventario').addEventListener('submit', function(e) {
+            // Buscamos todos los inputs de cantidad
+            const cantidades = document.querySelectorAll('input[name="cantidades"]');
+            let seleccionado = false;
+
+            // Comprobamos si al menos uno tiene un valor mayor que 0
+            cantidades.forEach(input => {
+                if (parseInt(input.value) > 0) {
+                    seleccionado = true;
+                }
+            });
+
+            if (!seleccionado) {
+                e.preventDefault(); // Detiene el envío del formulario
+                alert("⚠️ Por favor, selecciona al menos un artículo con cantidad mayor a 0.");
+            }
+        });
+    </script>
 
 <script>
     // Función para los botones +/- de cada tarjeta

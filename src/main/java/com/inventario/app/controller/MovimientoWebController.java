@@ -90,6 +90,15 @@ public String mostrarPaginaReportes(Model model) {
             @RequestParam("articulosIds") List<Integer> articulosIds,
             @RequestParam("cantidades") List<Integer> cantidades) {
 
+    // 1. VALIDACIÓN: ¿Ha seleccionado algo?
+    // Comprobamos si la lista es nula, está vacía o si todas las cantidades son 0
+    boolean tieneArticulos = articulosIds != null && !articulosIds.isEmpty() &&  cantidades.stream().anyMatch(c -> c != null && c > 0);
+
+    if (!tieneArticulos) {
+        // Si no hay nada, redirigimos con un mensaje de aviso
+        return "redirect:/inventario?error=vacio";
+    }
+
         // 1. Buscamos al empleado
         Empleado empleado = empRepo.findById(idEmpleado).orElse(null);
         if (empleado == null) return "redirect:/inventario?error=empleado";
